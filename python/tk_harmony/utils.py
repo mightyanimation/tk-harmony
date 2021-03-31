@@ -58,6 +58,7 @@ def copy_tree(
     rename_files=None,
     copy_function=shutil.copy2,
     progress_callback=None,
+    keep_folders=None,
 ):
     """
     Copies the files from the source folder ignoring the ones specified in
@@ -113,7 +114,21 @@ def copy_tree(
     # create directories first
     for i, dir_ in enumerate(make_directories):
         if not os.path.exists(dir_):
-            os.makedirs(dir_)
+            if keep_folders is None:
+                os.makedirs(dir_)
+            else:
+                for k_dir in keep_folders:
+                    if os.path.exists(dir_):
+                        break
+                    full_k_dir = os.path.join(destination_dir, k_dir)
+                    if dir_ == full_k_dir:
+                        os.makedirs(dir_)
+                    elif dir_.startswith(full_k_dir):
+                        os.makedirs(dir_)
+                    elif dir_ == destination_dir:
+                        os.makedirs(dir_)
+                    elif len(dir_) < destination_dir:
+                        os.makedirs(dir_)
 
     # copy files after
     for i, (source_file, destination_file) in enumerate(copy_files):
@@ -123,7 +138,19 @@ def copy_tree(
             progress_callback(i, copy_files_count, info=progress_info)
 
         # finally copy the file
-        copy_function(source_file, destination_file)
+        if keep_folders is None:
+            copy_function(source_file, destination_file)
+        else:
+            for k_dir in keep_folders:
+                full_k_dir = os.path.join(destination_dir, k_dir)
+                if destination_file.startswith(full_k_dir):
+                    if os.path.exists(destination_file):
+                        try:
+                            os.remove(destination_file)
+                            copy_function(source_file, destination_file)
+                        except:
+                            pass
+        
         copied_files.append(destination_file)
 
     if progress_callback is not None:
