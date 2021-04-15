@@ -1,6 +1,7 @@
 import os
 import shutil
 import fnmatch
+import traceback
 
 
 __author__ = "Diego Garcia Huerta"
@@ -74,7 +75,22 @@ def copy_tree(
     make_directories = set()
 
     for root, dirs, files in os.walk(source_dir):
-        relative_dir = os.path.relpath(root, source_dir)
+        valid_process = True
+        if keep_folders is not None:
+            if root != source_dir:
+                found_dir = False
+                for keep_dir in keep_folders:
+                    full_keep_fir = os.path.join(source_dir, keep_dir)
+                    if full_keep_fir in root:
+                        found_dir = True
+                if not found_dir:
+                    valid_process = False
+
+        # Avoid check current folder
+        if not valid_process:
+            continue
+
+        relative_dir    = os.path.relpath(root, source_dir)
         destination_dir = os.path.join(target_dir, relative_dir)
         make_directories.add(destination_dir)
 
@@ -114,42 +130,21 @@ def copy_tree(
     # create directories first
     for i, dir_ in enumerate(make_directories):
         if not os.path.exists(dir_):
-            if keep_folders is None:
-                os.makedirs(dir_)
-            else:
-                for k_dir in keep_folders:
-                    if os.path.exists(dir_):
-                        break
-                    full_k_dir = os.path.join(destination_dir, k_dir)
-                    if dir_ == full_k_dir:
-                        os.makedirs(dir_)
-                    elif dir_.startswith(full_k_dir):
-                        os.makedirs(dir_)
-                    elif dir_ == destination_dir:
-                        os.makedirs(dir_)
-                    elif len(dir_) < destination_dir:
-                        os.makedirs(dir_)
+            os.makedirs(dir_)
 
     # copy files after
     for i, (source_file, destination_file) in enumerate(copy_files):
         if progress_callback is not None:
             progress_info = {"source": source_file, "target": destination_file}
-
             progress_callback(i, copy_files_count, info=progress_info)
 
         # finally copy the file
-        if keep_folders is None:
+        try:
+            if os.path.exists(destination_file):
+                os.remove(destination_file)
             copy_function(source_file, destination_file)
-        else:
-            for k_dir in keep_folders:
-                full_k_dir = os.path.join(destination_dir, k_dir)
-                if destination_file.startswith(full_k_dir):
-                    if os.path.exists(destination_file):
-                        try:
-                            os.remove(destination_file)
-                            copy_function(source_file, destination_file)
-                        except:
-                            pass
+        except:
+            pass
         
         copied_files.append(destination_file)
 
@@ -157,3 +152,4 @@ def copy_tree(
         progress_callback(len(copied_files), copy_files_count)
 
     return copied_files
+
