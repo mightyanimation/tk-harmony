@@ -203,9 +203,18 @@ class HarmonyLauncher(SoftwareLauncher):
         resources_path = os.path.join(DIR_PATH, "resources")
         required_env["SGTK_HARMONY_ENGINE_RESOURCES_PATH"] = resources_path.replace("\\", "/")
 
-        newfile_template_path = os.path.join(
-            resources_path, "templates", "newfile", "template.xstage"
-        )
+        # Allows for custom newfile templates that can be set in an environment
+        # variable on the before_register_command, since there is not much control
+        # otherwise, unless we used the args which can be set on software entity
+        custom_newfile = os.environ.get('SGTK_HARMONY_CUSTOM_NEWFILE_TEMPLATE')
+        self.logger.debug("CUSTOM_NEWFILE_TEMPLATE: %s" % custom_newfile)
+        if custom_newfile:
+            newfile_template_path = custom_newfile
+        else:
+            newfile_template_path = os.path.join(
+                resources_path, "templates", "newfile", "template.xstage"
+            )
+
         required_env["SGTK_HARMONY_NEWFILE_TEMPLATE"] = newfile_template_path.replace(
             "\\", "/"
         )
@@ -239,9 +248,17 @@ class HarmonyLauncher(SoftwareLauncher):
         if not os.path.exists(user_scripts_path):
             os.makedirs(user_scripts_path)
 
-        xtage = os.path.join(
-            self.disk_location, "resources", "templates", "startup", "template.xstage"
-        )
+        # Allows for custom startup templates that can be set in an environment
+        # variable on the before_register_command, since there is not much control
+        # otherwise, unless we used the args which can be set on software entity
+        custom_startup = os.environ.get('SGTK_HARMONY_CUSTOM_STARTUP_TEMPLATE')
+        self.logger.debug("CUSTOM_STARTUP_TEMPLATE: %s" % custom_startup)
+        if custom_startup:
+            xtage = custom_startup
+        else:
+            xtage = os.path.join(
+                self.disk_location, "resources", "templates", "startup", "template.xstage"
+            )
         required_env["SGTK_HARMONY_STARTUP_TEMPLATE"] = xtage.replace("\\", "/")
 
         args = " -debug"
