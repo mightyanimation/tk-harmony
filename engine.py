@@ -381,10 +381,10 @@ class HarmonyEngine(Engine):
                     if int(major_version_number_str) < min_ver:
                         show_warning_dlg = False
 
-            if show_warning_dlg:
-                # Note, title is padded to try to ensure dialog isn't insanely
-                # narrow!
-                self.show_warning(msg)
+            # if show_warning_dlg:
+            #     # Note, title is padded to try to ensure dialog isn't insanely
+            #     # narrow!
+            #     self.show_warning(msg)
 
             # always log the warning to the script editor:
             self.logger.warning(msg)
