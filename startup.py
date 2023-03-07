@@ -343,7 +343,10 @@ class HarmonyLauncher(SoftwareLauncher):
                 )
                 for (path, key_dict) in executable_matches:
                     if executable_path == path:
-                        scripts_version = "%s00" % key_dict["version"].split(".")[0]
+                        version_split = key_dict["version"].split(".")
+                        scripts_version = "{}{}".format(
+                            version_split[0], version_split[-1]
+                        ).ljust(4, "0")
 
                         scripts_path = os.path.join(
                             path_root,
