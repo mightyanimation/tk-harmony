@@ -202,7 +202,9 @@ class Application(QTcpSocketClient):
         """
         copy_tree(*args, **kwargs)
 
-    def save_project_as(self, target_file, source_file=None, open_project=True):
+    def save_project_as(
+        self, target_file, source_file=None, open_project=True, keep_folders=None
+    ):
         self.engine.logger.debug("Saving project as...")
 
         if source_file is None:
@@ -258,6 +260,7 @@ class Application(QTcpSocketClient):
                 target_folder,
                 exclude_files=exclude_files,
                 rename_files=rename_files,
+                keep_folders=keep_folders,
             )
 
         except Exception as e:
