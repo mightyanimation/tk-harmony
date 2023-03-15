@@ -344,6 +344,7 @@ class HarmonyLauncher(SoftwareLauncher):
                 for (path, key_dict) in executable_matches:
                     if executable_path == path:
                         version_split = key_dict["version"].split(".")
+                        self.logger.debug("version_split: %s" % version_split)
                         if len(version_split) > 1:
                             scripts_version = "{}{}".format(
                                 version_split[0], version_split[-1]
@@ -352,6 +353,7 @@ class HarmonyLauncher(SoftwareLauncher):
                             scripts_version = "{}00".format(
                                 version_split[0])
 
+                        self.logger.debug("scripts_version: %s" % scripts_version)
                         scripts_path = os.path.join(
                             path_root,
                             "%(company00)s Animation" % key_dict,
@@ -360,6 +362,7 @@ class HarmonyLauncher(SoftwareLauncher):
                         )
                         break
 
+        self.logger.debug("scripts_path: %s" % scripts_path)
         return scripts_path
 
     def _find_software(self):
