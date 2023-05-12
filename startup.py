@@ -9,13 +9,10 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
-import re
 import sys
 import shutil
 import hashlib
 import socket
-import platform
-import subprocess
 
 import sgtk
 from sgtk.platform.errors import TankEngineInitError
@@ -367,6 +364,8 @@ class HarmonyLauncher(SoftwareLauncher):
             executable_matches = self._glob_and_match(
                 executable_template, self.COMPONENT_REGEX_LOOKUP
             )
+
+            self.logger.debug("executable_matches %s.", str(executable_matches))
 
             # Extract all products from that executable.
             for (executable_path, key_dict) in executable_matches:
