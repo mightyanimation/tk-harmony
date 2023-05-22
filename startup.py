@@ -154,6 +154,8 @@ class HarmonyLauncher(SoftwareLauncher):
         "darwin": [
             "/Applications/{company00} {product00} {version} {edition00}/{product01} {edition01}.app/Contents/MacOS/{product02} {edition02}",
             "/Applications/{company00} {product00} {version} {edition00}/{product01} {edition01}.app/Contents/tba/macosx/bin/{product02} {edition02}",
+
+            "/Applications/{company00} {product00} {version} {edition00}/{product01} {version01} {edition01}.app/Contents/tba/macosx/bin/{product02} {edition02}",  # TODO: take care for dif macOS version (add a new one?)
         ],
     }
 
