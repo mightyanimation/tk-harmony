@@ -316,7 +316,7 @@ class HarmonyLauncher(SoftwareLauncher):
         if sgtk.util.is_windows():
             path_root = os.path.expandvars("%APPDATA%")
         elif sgtk.util.is_linux():
-            path_root = os.path.expandvars("~")
+            path_root = os.path.expanduser("~")
         elif sgtk.util.is_macos():
             path_root = os.path.expandvars("~/Library/Preferences")
 
