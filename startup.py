@@ -125,6 +125,8 @@ class HarmonyLauncher(SoftwareLauncher):
     # template, therefore the duplication of regex components:
     COMPONENT_REGEX_LOOKUP = {
         "version": r"\d\d\.*\d*",
+        "version01": r"\d\d\.*\d*",
+        "version02": r"\d\d\.*\d*",
         "platform": r" \(x86\)",
         "edition00": r"\w+",
         "edition01": r"\w+",
