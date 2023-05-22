@@ -318,7 +318,7 @@ class HarmonyLauncher(SoftwareLauncher):
         elif sgtk.util.is_linux():
             path_root = os.path.expanduser("~")
         elif sgtk.util.is_macos():
-            path_root = os.path.expandvars("~/Library/Preferences")
+            path_root = os.path.expanduser("~/Library/Preferences")
 
         if path_root:
             for executable_template in executable_templates:
