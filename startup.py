@@ -199,6 +199,8 @@ class HarmonyLauncher(SoftwareLauncher):
 
         required_env["SGTK_HARMONY_ENGINE_JS_STARTUP"] = startup_js_path.replace("\\", "/")
 
+        self.logger.debug("SGTK_HARMONY_ENGINE_JS_STARTUP: %s" % required_env["SGTK_HARMONY_ENGINE_JS_STARTUP"])
+
         required_env["SGTK_HARMONY_ENGINE_PYTHON"] = sys.executable.replace("\\", "/")
 
         resources_path = os.path.join(DIR_PATH, "resources")
@@ -251,6 +253,10 @@ class HarmonyLauncher(SoftwareLauncher):
         self.logger.debug("Launch info: %s" % args)
 
         ensure_scripts_up_to_date(resources_packages_path, user_scripts_path)
+
+        #if not os.path.exists(exec_path) or not os.path.isfile(exec_path):
+        #    exec_path = '"{}"'.format(exec_path)
+        exec_path = '"{}"'.format(exec_path)
 
         return LaunchInformation(exec_path, args, required_env)
 
@@ -328,9 +334,20 @@ class HarmonyLauncher(SoftwareLauncher):
                 for (path, key_dict) in executable_matches:
                     if executable_path == path:
                         version_split = key_dict["version"].split(".")
-                        scripts_version = "{}{}".format(
-                            version_split[0], version_split[-1]
-                        ).ljust(4, "0")
+                        21
+                        1
+                        #scripts_version = "{}{}".format(
+                        #    version_split[0], version_split[-1]
+                        #).ljust(4, "0")
+                        if len(version_split) < 2:
+                            scripts_version = "{}".format(version_split[0]).ljust(4, '0')
+                        elif len(version_split) == 2:
+                            scripts_version = "{}{}".format(
+                                version_split[0], version_split[1]
+                            ).ljust(4, '0')
+                        else:
+                            scripts_version = "{}{}".format(version_split[0], version_split[-1])
+                            self.logger.warning("Version %s could not be supported.", key_dict["version"])
 
                         scripts_path = os.path.join(
                             path_root,
