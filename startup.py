@@ -256,7 +256,11 @@ class HarmonyLauncher(SoftwareLauncher):
 
         #if not os.path.exists(exec_path) or not os.path.isfile(exec_path):
         #    exec_path = '"{}"'.format(exec_path)
-        exec_path = '"{}"'.format(exec_path)
+
+        # on windows this formatting causes an error, so we avoid the format for
+        # windows os
+        if not sgtk.util.is_windows():
+            exec_path = '"{}"'.format(exec_path)
 
         return LaunchInformation(exec_path, args, required_env)
 
@@ -264,7 +268,7 @@ class HarmonyLauncher(SoftwareLauncher):
         software_icon = os.path.join(
             os.path.dirname(path), "..", "..", "resources", "icons", "harmony%s.png" % edition
         )
-        
+
         if os.path.exists(software_icon):
             return software_icon
 
@@ -357,6 +361,7 @@ class HarmonyLauncher(SoftwareLauncher):
                         )
                         break
 
+        self.logger.info("scripts_path: {}".format(scripts_path))
         return scripts_path
 
     def _find_software(self):
@@ -384,6 +389,10 @@ class HarmonyLauncher(SoftwareLauncher):
 
             executable_matches = self._glob_and_match(
                 executable_template, self.COMPONENT_REGEX_LOOKUP
+            )
+
+            self.logger.debug(
+                "executable_matches: {}".format(executable_matches)
             )
 
             # Extract all products from that executable.
