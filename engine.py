@@ -305,7 +305,7 @@ class HarmonyEngine(Engine):
     @property
     def host_info(self):
         """
-        :returns: A dictionary with information about the application hosting 
+        :returns: A dictionary with information about the application hosting
                   his engine.
 
         The returned dictionary is of the following form on success:
@@ -552,8 +552,8 @@ class HarmonyEngine(Engine):
 
     def post_context_change(self, old_context, new_context):
         """
-        Runs after a context change. The Harmony event watching will 
-        be stopped and new callbacks registered containing the new context 
+        Runs after a context change. The Harmony event watching will
+        be stopped and new callbacks registered containing the new context
         information.
 
         :param old_context: The context being changed away from.
@@ -572,14 +572,14 @@ class HarmonyEngine(Engine):
 
     def _run_app_instance_commands(self):
         """
-        Runs the series of app instance commands listed in the 
+        Runs the series of app instance commands listed in the
         'run_at_startup' setting of the environment configuration yaml file.
         """
 
         # Build a dictionary mapping app instance names to dictionaries of
         # commands they registered with the engine.
         app_instance_commands = {}
-        for (cmd_name, value) in self.commands.iteritems():
+        for (cmd_name, value) in iter(self.commands.items()):
             app_instance = value["properties"].get("app")
             if app_instance:
                 # Add entry 'command name: command function' to the command
@@ -609,7 +609,7 @@ class HarmonyEngine(Engine):
             else:
                 if not setting_cmd_name:
                     # Run all commands of the given app instance.
-                    for (cmd_name, command_function) in cmd_dict.iteritems():
+                    for (cmd_name, command_function) in iter(cmd_dict.items()):
                         msg = (
                             "%s startup running app '%s' command '%s'.",
                             self.name,
