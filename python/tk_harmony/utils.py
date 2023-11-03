@@ -9,7 +9,7 @@ __contact__ = "https://www.linkedin.com/in/diegogh/"
 
 
 def normpath(path):
-    return os.path.abspath(os.path.realpath(path)).replace("\\", "/")
+    return os.path.abspath(path).replace("\\", "/")
 
 
 class Cached(object):
