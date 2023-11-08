@@ -46,8 +46,9 @@ var META_SHOTGUN_PATH = "meta.shotgun.path";
 
 function singleShotTimer(msec, callback)
 {
-    var t = new QTimer;
-    t.changeInterval(msec);
+    var t = new QTimer();
+    t.interval = msec;
+    t.singleShot = true;
 
     function on_elapsed_time()
     {
