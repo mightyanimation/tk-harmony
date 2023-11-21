@@ -194,20 +194,30 @@ class HarmonyLauncher(SoftwareLauncher):
 
         # Prepare the launch environment with variables required by the
         # classic bootstrap approach.
-        self.logger.debug("Preparing Harmony Launch via Toolkit Classic methodology ...")
+        self.logger.debug(
+            "Preparing Harmony Launch via Toolkit Classic methodology ..."
+        )
 
         required_env["SGTK_HARMONY_EXEC_PATH"] = exec_path.replace("\\", "/")
 
         required_env["SGTK_HARMONY_ENGINE_STARTUP"] = startup_path.replace("\\", "/")
 
-        required_env["SGTK_HARMONY_ENGINE_JS_STARTUP"] = startup_js_path.replace("\\", "/")
+        required_env["SGTK_HARMONY_ENGINE_JS_STARTUP"] = startup_js_path.replace(
+            "\\", "/"
+        )
 
-        self.logger.debug("SGTK_HARMONY_ENGINE_JS_STARTUP: %s" % required_env["SGTK_HARMONY_ENGINE_JS_STARTUP"])
+        self.logger.debug(
+            "SGTK_HARMONY_ENGINE_JS_STARTUP: {}".format(
+                required_env["SGTK_HARMONY_ENGINE_JS_STARTUP"]
+            )
+        )
 
         required_env["SGTK_HARMONY_ENGINE_PYTHON"] = sys.executable.replace("\\", "/")
 
         resources_path = os.path.join(DIR_PATH, "resources")
-        required_env["SGTK_HARMONY_ENGINE_RESOURCES_PATH"] = resources_path.replace("\\", "/")
+        required_env["SGTK_HARMONY_ENGINE_RESOURCES_PATH"] = resources_path.replace(
+            "\\", "/"
+        )
 
         # Allows for custom newfile templates that can be set in an environment
         # variable on the before_register_command, since there is not much control
