@@ -191,24 +191,43 @@ class HarmonyLauncher(SoftwareLauncher):
 
         # Prepare the launch environment with variables required by the
         # classic bootstrap approach.
-        self.logger.debug("Preparing Harmony Launch via Toolkit Classic methodology ...")
+        self.logger.debug(
+            "Preparing Harmony Launch via Toolkit Classic methodology ..."
+        )
 
         required_env["SGTK_HARMONY_EXEC_PATH"] = exec_path.replace("\\", "/")
 
         required_env["SGTK_HARMONY_ENGINE_STARTUP"] = startup_path.replace("\\", "/")
 
-        required_env["SGTK_HARMONY_ENGINE_JS_STARTUP"] = startup_js_path.replace("\\", "/")
+        required_env["SGTK_HARMONY_ENGINE_JS_STARTUP"] = startup_js_path.replace(
+            "\\", "/"
+        )
 
-        self.logger.debug("SGTK_HARMONY_ENGINE_JS_STARTUP: %s" % required_env["SGTK_HARMONY_ENGINE_JS_STARTUP"])
+        self.logger.debug(
+            "SGTK_HARMONY_ENGINE_JS_STARTUP: {}".format(
+                required_env["SGTK_HARMONY_ENGINE_JS_STARTUP"]
+            )
+        )
 
         required_env["SGTK_HARMONY_ENGINE_PYTHON"] = sys.executable.replace("\\", "/")
 
         resources_path = os.path.join(DIR_PATH, "resources")
-        required_env["SGTK_HARMONY_ENGINE_RESOURCES_PATH"] = resources_path.replace("\\", "/")
-
-        newfile_template_path = os.path.join(
-            resources_path, "templates", "newfile", "template.xstage"
+        required_env["SGTK_HARMONY_ENGINE_RESOURCES_PATH"] = resources_path.replace(
+            "\\", "/"
         )
+
+        # Allows for custom newfile templates that can be set in an environment
+        # variable on the before_register_command, since there is not much control
+        # otherwise, unless we used the args which can be set on software entity
+        custom_newfile = os.environ.get('SGTK_HARMONY_CUSTOM_NEWFILE_TEMPLATE')
+        self.logger.debug("CUSTOM_NEWFILE_TEMPLATE: %s" % custom_newfile)
+        if custom_newfile:
+            newfile_template_path = custom_newfile
+        else:
+            newfile_template_path = os.path.join(
+                resources_path, "templates", "newfile", "template.xstage"
+            )
+
         required_env["SGTK_HARMONY_NEWFILE_TEMPLATE"] = newfile_template_path.replace(
             "\\", "/"
         )
@@ -242,9 +261,18 @@ class HarmonyLauncher(SoftwareLauncher):
         if not os.path.exists(user_scripts_path):
             os.makedirs(user_scripts_path)
 
-        xtage = os.path.join(
-            self.disk_location, "resources", "templates", "startup", "template.xstage"
-        )
+        # Allows for custom startup templates that can be set in an environment
+        # variable on the before_register_command, since there is not much control
+        # otherwise, unless we used the args which can be set on software entity
+        custom_startup = os.environ.get('SGTK_HARMONY_CUSTOM_STARTUP_TEMPLATE')
+        self.logger.debug("CUSTOM_STARTUP_TEMPLATE: %s" % custom_startup)
+        if custom_startup:
+            xtage = custom_startup
+        else:
+            xtage = os.path.join(
+                self.disk_location, "resources", "templates", "startup", "template.xstage"
+            )
+
         required_env["SGTK_HARMONY_STARTUP_TEMPLATE"] = xtage.replace("\\", "/")
 
         args = " -debug"
