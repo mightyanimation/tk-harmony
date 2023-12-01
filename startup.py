@@ -9,10 +9,13 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
+import re
 import sys
 import shutil
 import hashlib
 import socket
+import platform
+import subprocess
 
 import sgtk
 from sgtk.platform.errors import TankEngineInitError
@@ -366,21 +369,16 @@ class HarmonyLauncher(SoftwareLauncher):
                 for (path, key_dict) in executable_matches:
                     if executable_path == path:
                         version_split = key_dict["version"].split(".")
-                        21
-                        1
-                        #scripts_version = "{}{}".format(
-                        #    version_split[0], version_split[-1]
-                        #).ljust(4, "0")
-                        if len(version_split) < 2:
-                            scripts_version = "{}".format(version_split[0]).ljust(4, '0')
-                        elif len(version_split) == 2:
+                        self.logger.debug("version_split: %s" % version_split)
+                        if len(version_split) > 1:
                             scripts_version = "{}{}".format(
-                                version_split[0], version_split[1]
-                            ).ljust(4, '0')
+                                version_split[0], version_split[-1]
+                            ).ljust(4, "0")
                         else:
-                            scripts_version = "{}{}".format(version_split[0], version_split[-1])
-                            self.logger.warning("Version %s could not be supported.", key_dict["version"])
+                            scripts_version = "{}00".format(
+                                version_split[0])
 
+                        self.logger.debug("scripts_version: %s" % scripts_version)
                         scripts_path = os.path.join(
                             path_root,
                             "%(company00)s Animation" % key_dict,
