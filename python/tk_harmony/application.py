@@ -235,6 +235,8 @@ class Application(QTcpSocketClient):
 
         # make sure we keep the good ones!
         exclude_files = filter(lambda x: x not in include_files, exclude_files)
+        if exclude_files:
+            exclude_files = list(exclude_files)
 
         # rename the files from source folder to publish folder
         rename_files = {}
