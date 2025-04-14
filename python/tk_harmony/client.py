@@ -6,6 +6,7 @@ Module responsible for the communication through sockets
 import sys
 import os
 import time
+import traceback
 
 import sgtk
 
@@ -31,6 +32,7 @@ import sys
 import time
 import json
 import uuid
+from pprint import pformat as pf
 
 import logging
 from datetime import datetime
@@ -127,13 +129,37 @@ class QTcpSocketClient(QtCore.QObject):
         logger.debug("Connection: %s" % self.connection)
 
         logger.debug("Setting up callbacks...")
-        self.connection.setSocketOption(self.connection.LowDelayOption, 1)
-        self.connection.setSocketOption(self.connection.KeepAliveOption, 1)
 
-        self.connection.readyRead.connect(self._on_ready_read)
-        self.connection.error.connect(self._on_error)
-        self.connection.bytesWritten.connect(self._on_bytes_written)
-        self.connection.stateChanged.connect(self._on_state_changed)
+        # Qt 5.x code (PySide2)
+        if QtCore.__version__.startswith("5."):
+            try:
+                self.connection.setSocketOption(self.connection.LowDelayOption, 1)
+                self.connection.setSocketOption(self.connection.KeepAliveOption, 1)
+                self.connection.readyRead.connect(self._on_ready_read)
+                self.connection.error.connect(self._on_error)
+                self.connection.bytesWritten.connect(self._on_bytes_written)
+                self.connection.stateChanged.connect(self._on_state_changed)
+            except Exception as e:
+                logger.error(
+                    "Error setting up callbacks: {}, full traceback:\n{}".format(
+                        e, traceback.format_exc()
+                    )
+                )
+        # Qt 6.x code (PySide6)
+        elif QtCore.__version__.startswith("6."):
+            try:
+                self.connection.setSocketOption(qt.QtNetwork.QTcpSocket.SocketOption.LowDelayOption, 1)
+                self.connection.setSocketOption(qt.QtNetwork.QTcpSocket.SocketOption.KeepAliveOption, 1)
+                self.connection.readyRead.connect(self._on_ready_read)
+                self.connection.errorOccurred.connect(self._on_error)
+                self.connection.bytesWritten.connect(self._on_bytes_written)
+                self.connection.stateChanged.connect(self._on_state_changed)
+            except Exception as e:
+                logger.error(
+                    "Error setting up callbacks: {}, full traceback:\n{}".format(
+                        e, traceback.format_exc()
+                    )
+                )
 
         logger.debug("Setting up callbacks... Done.")
 
@@ -165,8 +191,11 @@ class QTcpSocketClient(QtCore.QObject):
     def _receive(self):
         logger.debug("Receiving data ... ")
 
+        logger.debug("PyQt version: {}".format(QtCore.__version__))
+        # logger.info("PyQt version_info: {}".format(QtCore.__version_info__))
+
         stream = QtCore.QDataStream(self.connection)
-        stream.setVersion(QtCore.QDataStream.Qt_4_6)
+        # stream.setVersion(QtCore.QDataStream.Qt_4_6)
 
         i = 0
         while self.connection.bytesAvailable() > 0:
@@ -178,11 +207,35 @@ class QTcpSocketClient(QtCore.QObject):
                 #     "Reading data size for request %s in queue: %s"
                 #     % (i, self._block_size)
                 # )
+                logger.debug("_block_size: {}".format(self._block_size))
 
             if self._block_size > 0 and self.connection.bytesAvailable() >= self._block_size:
                 data = stream.readRawData(self._block_size)
-                request = QtCore.QTextCodec.codecForMib(106).toUnicode(data)
-                # logger.debug("About to process request %s in queue: %s" % (i, request))
+                logger.debug("data: {}, type: {}".format(data, type(data)))
+                # logger.info("dir(data):\n{}".format(pf(dir(data))))
+                # Qt 5.x code (PySide2)
+                if QtCore.__version__.startswith("5."):
+                    try:
+                        request = QtCore.QTextCodec.codecForMib(106).toUnicode(data)
+                    except Exception as e:
+                        logger.warning(
+                            "Error decoding request: {}, full traceback:\n{}".format(
+                                e, traceback.format_exc()
+                            )
+                        )
+                # Qt 6.x code (PySide6)
+                elif QtCore.__version__.startswith("6."):
+                    try:
+                        # request = QtCore.QTextCodec.codecForName("UTF-8").toUnicode(data)
+                        request = data.decode("utf-8")
+                    except Exception as e:
+                        logger.warning(
+                            "Error decoding request: {}, full traceback:\n{}".format(
+                                e, traceback.format_exc()
+                            )
+                        )
+                # logger.debug("About to process request:\n%s\nin queue:\n%s" % (i, request))
+                logger.debug("decoded request: {}, type: {}".format(request, type(request)))
                 self._process_request(request)
                 self._block_size = 0
                 i += 1
