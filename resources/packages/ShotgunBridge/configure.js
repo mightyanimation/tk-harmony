@@ -1562,19 +1562,34 @@ function bootstrap()
         MessageLog.trace('   engine app id: ' + app_id);
         MessageLog.trace('   engine python: ' + python_exec);
         MessageLog.trace('   engine bootstrap: ' + boostrap_py);
+        
+        var args = [
+            boostrap_py,
+            engine_port,
+            engine_name,
+            app_id
+        ];
 
-        var engine_process = new Process2(python_exec, boostrap_py,  engine_port, engine_name, app_id);
+
+        var engine_process = new QProcess();
+
+        engine_process.start(python_exec, args);
+
+        var pid = engine_process.processId();
+        if (pid > 0) {
+            MessageLog.trace("Process id PID: " + pid);
+        } else {
+            MessageLog.trace("ERROR: Could not obtain PID immediately. The process may not have started correctly. Check errorOccurred logs.");
+        }
+
         MessageLog.trace('About to execute: ');
-        MessageLog.trace(engine_process.commandLine());
-
-        var error = engine_process.launchAndDetach();
-        MessageLog.trace('error ' + error );
+        MessageLog.trace('  Command: ' + python_exec + ' ' + args.map(function(arg){ return arg.indexOf(' ') !== -1 ? '"' + arg + '"' : arg; }).join(' '));
 
         app.shotgun.window = null;
         app.shotgun.engine_name = engine_name;
 
         app.shotgun.engine_process = engine_process;
-        app.shotgun.engine_pid = engine_process.pid();
+        app.shotgun.engine_pid = pid;
 
         app.shotgun.engine_host = "localhost";
         app.shotgun.engine_port = parseInt(engine_port);
@@ -1582,7 +1597,12 @@ function bootstrap()
         app.shotgun.debug = true;
 
         MessageLog.trace("Registered onAboutToQuit callback: " + app.aboutToQuit);
-        app.aboutToQuit.connect(app, app.shotgun.engine_process.terminate);
+        app.aboutToQuit.connect(app, function() {
+            MessageLog.trace("Application closing. Attempting to terminate engine process (PID: " + app.shotgun.engine_pid + ").");
+            if (app.shotgun.engine_process && app.shotgun.engine_process.state() != QProcess.NotRunning) {
+                app.shotgun.engine_process.terminate();
+            }
+        });
 
         app.__SGTK_STARTUP_INIT__ = true;
 
