@@ -254,6 +254,12 @@ class HarmonyLauncher(SoftwareLauncher):
         self.logger.debug("Executable path: %s" % exec_path)
         self.logger.debug("Searching for scripts here: %s" % scripts_path)
 
+        required_env["SGTK_HARMONY_SCRIPTS_PATH"] = scripts_path
+
+        preferences_path = self._resolve_prefrences_path(exec_path)
+        required_env["SGTK_HARMONY_PREFERENCES_PATH"] = preferences_path
+
+
         if scripts_path is None:
             message = "Could not find the scripts path for " "executable: %s\n" % exec_path
             raise TankEngineInitError(message)
@@ -445,3 +451,56 @@ class HarmonyLauncher(SoftwareLauncher):
                 )
 
         return sw_versions
+
+    def _resolve_prefrences_path(self, executable_path):
+        """
+        Find the scripts folder where to put the Harmony scripts for the engine.
+        """
+        scripts_path = None
+
+        executable_templates = self.EXECUTABLE_TEMPLATES.get(
+            "darwin"
+            if sgtk.util.is_macos()
+            else "win32"
+            if sgtk.util.is_windows()
+            else "linux"
+            if sgtk.util.is_linux()
+            else []
+        )
+
+        path_root = None
+        if sgtk.util.is_windows():
+            path_root = os.path.expandvars("%APPDATA%")
+        elif sgtk.util.is_linux():
+            path_root = os.path.expanduser("~")
+        elif sgtk.util.is_macos():
+            path_root = os.path.expanduser("~/Library/Preferences")
+
+        if path_root:
+            for executable_template in executable_templates:
+                executable_matches = self._glob_and_match(
+                    executable_template, self.COMPONENT_REGEX_LOOKUP
+                )
+                for (path, key_dict) in executable_matches:
+                    if executable_path == path:
+                        version_split = key_dict["version"].split(".")
+                        self.logger.debug("version_split: %s" % version_split)
+                        if len(version_split) > 1:
+                            scripts_version = "{}{}".format(
+                                version_split[0], version_split[-1]
+                            ).ljust(4, "0")
+                        else:
+                            scripts_version = "{}00".format(
+                                version_split[0])
+
+                        self.logger.debug("scripts_version: %s" % scripts_version)
+                        scripts_path = os.path.join(
+                            path_root,
+                            "%(company00)s Animation" % key_dict,
+                            "%(company00)s %(product00)s %(edition00)s" % key_dict,
+                            "full-%s-pref" % scripts_version,
+                        )
+                        break
+
+        self.logger.info("preferences_path: {}".format(scripts_path))
+        return scripts_path
