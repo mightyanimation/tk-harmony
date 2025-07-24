@@ -456,7 +456,7 @@ class HarmonyLauncher(SoftwareLauncher):
         """
         Find the scripts folder where to put the Harmony scripts for the engine.
         """
-        scripts_path = None
+        preferences_path = None
 
         executable_templates = self.EXECUTABLE_TEMPLATES.get(
             "darwin"
@@ -486,21 +486,21 @@ class HarmonyLauncher(SoftwareLauncher):
                         version_split = key_dict["version"].split(".")
                         self.logger.debug("version_split: %s" % version_split)
                         if len(version_split) > 1:
-                            scripts_version = "{}{}".format(
+                            pref_version = "{}{}".format(
                                 version_split[0], version_split[-1]
                             ).ljust(4, "0")
                         else:
-                            scripts_version = "{}00".format(
+                            pref_version = "{}00".format(
                                 version_split[0])
 
-                        self.logger.debug("scripts_version: %s" % scripts_version)
-                        scripts_path = os.path.join(
+                        self.logger.debug("pref_version: %s" % pref_version)
+                        preferences_path = os.path.join(
                             path_root,
                             "%(company00)s Animation" % key_dict,
                             "%(company00)s %(product00)s %(edition00)s" % key_dict,
-                            "full-%s-pref" % scripts_version,
+                            "full-%s-pref" % pref_version,
                         )
                         break
 
-        self.logger.info("preferences_path: {}".format(scripts_path))
-        return scripts_path
+        self.logger.info("preferences_path: {}".format(preferences_path))
+        return preferences_path
