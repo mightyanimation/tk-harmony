@@ -332,6 +332,40 @@ class HarmonyEngine(Engine):
             pass
         return host_info
 
+    @property
+    def harmony_exe_path(self):
+        cmds="""
+        function get_harmony_exe() {
+            var harmony_exe = System.getenv("SGTK_HARMONY_EXEC_PATH");
+            return harmony_exe;
+        }
+        get_harmony_exe();
+"""
+        return self._dcc_app.custom_script(cmds)
+    
+    @property
+    def harmony_scripts_path(self):
+        cmds="""
+        function harmony_scripts_path() {
+            var harmony_scripts = System.getenv("SGTK_HARMONY_SCRIPTS_PATH");
+            return harmony_scripts;
+        }
+        harmony_scripts_path();
+"""
+        return self._dcc_app.custom_script(cmds)
+    
+    @property
+    def harmony_preferences_path(self):
+        cmds="""
+        function harmony_preferences_path() {
+            var harmony_preferences = System.getenv("SGTK_HARMONY_PREFERENCES_PATH");
+            return harmony_preferences;
+        }
+        harmony_preferences_path();
+"""
+        return self._dcc_app.custom_script(cmds)
+    
+    
     def warn_dcc_app_version(self):
 
         # check that we are running an ok version of Toon Boom Harmony
