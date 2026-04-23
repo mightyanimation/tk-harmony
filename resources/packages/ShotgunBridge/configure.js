@@ -7,42 +7,42 @@ function configure(packageFolder, packageName)
 
   //---------------------------
   //Create Shortcuts
-  ScriptManager.addShortcut( { id       : "ShotgunShortcut",
-                               text     : "Shotgun Menu ...",
-                               action   : "ShotgunMenu in ./configure.js",
-                               longDesc : "Starts the shotgun connection",
+  ScriptManager.addShortcut( { id       : "FPTRShortcut",
+                               text     : "FPTR Menu ...",
+                               action   : "FPTRMenu in ./configure.js",
+                               longDesc : "Starts the fptr connection",
                                order    : "256",
-                               categoryId   : "Shotgun",
+                               categoryId   : "FPTR",
                                categoryText : "Scripts" } );
 
   //---------------------------
   //Create Menu items
   ScriptManager.addMenuItem( { targetMenuId : "Windows",
-                               id           : "ShotgunMenuID",
-                               icon     : "shotgun.png",
-                               text         : "Shotgun Menu ...",
-                               action       : "ShotgunMenu in ./configure.js",
-                               shortcut     : "ShotgunShortcut" } );
+                               id           : "FPTRMenuID",
+                               icon     : "fptr.png",
+                               text         : "FPTR Menu ...",
+                               action       : "FPTRMenu in ./configure.js",
+                               shortcut     : "FPTRShortcut" } );
 
   //---------------------------
   //Create Toolbar
-  var ShotgunToolbar = new ScriptToolbarDef( { id          : "ShotgunToolbar",
-                                               text        : "Shotgun",
+  var FPTRToolbar = new ScriptToolbarDef( { id          : "FPTRToolbar",
+                                               text        : "FPTR",
                                                customizable: "false" } );
 
-  ShotgunToolbar.addButton( { text     : "Shotgun",
-                              icon     : "shotgun.png",
-                              action   : "ShotgunMenu in ./configure.js" ,
-                              shortcut : "ShotgunShortcut" } );
+  FPTRToolbar.addButton( { text     : "FPTR",
+                              icon     : "fptr.png",
+                              action   : "FPTRMenu in ./configure.js" ,
+                              shortcut : "FPTRShortcut" } );
 
-  ScriptManager.addToolbar(ShotgunToolbar);
+  ScriptManager.addToolbar(FPTRToolbar);
   init();
 }
 
 // -----------------------------------------------------------------------------
 // Misc utilities
 // -----------------------------------------------------------------------------
-var META_SHOTGUN_PATH = "meta.shotgun.path";
+var META_SHOTGUN_PATH = "meta.fptr.path";
 
 
 // Ensure variables False and True are correctly initialized
@@ -281,7 +281,7 @@ function dropMovieInNewElement( root, filename, transparency, alignmentRule, pro
 function _get_engine()
 {
     var app = QCoreApplication.instance();
-    var engine = app.shotgun_engine;
+    var engine = app.fptr_engine;
 
     if (engine != null && engine.is_engine_ready)
         return engine;
@@ -350,7 +350,7 @@ function import_movie(filename, parent)
 // Fairly obscure from Harmony, the metadata editor GUI is not more than a
 // node property editor that add/modifies the property 'meta' in a given node.
 //
-// Note that we store all our shotgun metadata under meta.shotgun property.
+// Note that we store all our fptr metadata under meta.fptr property.
 // -----------------------------------------------------------------------------
 
 
@@ -426,35 +426,35 @@ function log_debug(data)
     message = typeof(data.message) != "undefined" ? data.message : data;
 
     if (this.debug)
-        MessageLog.trace("(DEBUG) Shotgun bridge: " + message.toString());
+        MessageLog.trace("(DEBUG) FPTR bridge: " + message.toString());
 }
 
 
 function log_info(data)
 {
     message = typeof(data.message) != "undefined" ? data.message : data;
-    MessageLog.trace("(INFO) Shotgun bridge: " + message.toString());
+    MessageLog.trace("(INFO) FPTR bridge: " + message.toString());
 }
 
 
 function log_warning(data)
 {
     message = typeof(data.message) != "undefined" ? data.message : data;
-    MessageLog.trace("(WARNING) Shotgun bridge: " + message.toString());
+    MessageLog.trace("(WARNING) FPTR bridge: " + message.toString());
 }
 
 
 function log_error(data)
 {
     message = typeof(data.message) != "undefined" ? data.message : data;
-    MessageLog.trace("(ERROR) Shotgun bridge: " + message.toString());
+    MessageLog.trace("(ERROR) FPTR bridge: " + message.toString());
 }
 
 
 function log_exception(data)
 {
     message = typeof(data.message) != "undefined" ? data.message : data;
-    MessageLog.trace("(EXCEPTION) Shotgun bridge: " + message.toString());
+    MessageLog.trace("(EXCEPTION) FPTR bridge: " + message.toString());
 }
 
 
@@ -869,7 +869,7 @@ function Engine()
 {
     var self = this;
     self.app = QCoreApplication.instance();
-    self.name = "Shotgun Engine"
+    self.name = "FPTR Engine"
     self.window = QApplication.activeWindow();
     self.server = null;
     self.log_debug = log_debug;
@@ -891,7 +891,7 @@ function Engine()
         var ui_file = resources_path + "/ui/busy_dialog.ui";
         var icon_file = resources_path + "/ui/sg_logo_80px.png";
         var ui = UiLoader.load(ui_file);
-        ui.windowTitle = "Shotgun Harmony Engine";
+        ui.windowTitle = "FPTR Harmony Engine";
 
         var icon_widget = ui.frame.horizontalLayout.itemAt(0).widget();
         icon_widget.icon = icon_file ;
@@ -1064,7 +1064,7 @@ function Engine()
     self.is_startup_project = function(data)
     {
         var is_startup_scene = false;
-        var sg_metadata = scene.metadata("Shotgun Toolkit Engine");
+        var sg_metadata = scene.metadata("FPTR Toolkit Engine");
 
         if (sg_metadata != null)
             is_startup_scene = sg_metadata.value == "Startup template";
@@ -1087,7 +1087,7 @@ function Engine()
         start_frame_metadata = {
                                   "name"       : "sg_start_frame",
                                   "type"       : "int",
-                                  "creator"    : "Shotgun Harmony Engine",
+                                  "creator"    : "FPTR Harmony Engine",
                                   "version"    : "1.0",
                                   "value"      : start_frame
                                };
@@ -1112,7 +1112,7 @@ function Engine()
         stop_frame_metadata = {
                                   "name"       : "sg_stop_frame",
                                   "type"       : "int",
-                                  "creator"    : "Shotgun Harmony Engine",
+                                  "creator"    : "FPTR Harmony Engine",
                                   "version"    : "1.0",
                                   "value"      : stop_frame
                                };
@@ -1273,7 +1273,7 @@ function Engine()
         {
             if (self.is_startup_project())
             {
-                version_name = "Shotgun Toolkit - Open a file from the shotgun menu.";
+                version_name = "FPTR Toolkit - Open a file from the fptr menu.";
             }
             else
             {
@@ -1436,33 +1436,33 @@ function Engine()
     }
 }
 
-function Shotgun()
+function FPTR()
 {
-    // Check if we are under a shotgun desktop environment first.
-    // Has Harmony be opened through the Shotgun Launcher ?
+    // Check if we are under a fptr desktop environment first.
+    // Has Harmony be opened through the FPTR Launcher ?
     var engine = System.getenv("SGTK_ENGINE");
     var context = System.getenv("SGTK_CONTEXT");
     if (engine == "" || context == "")
     {
-        var message = "Harmony has not been run from within the Shotgun Desktop Launcher.\n\nNot under a Shotgun Desktop environment.\n";
+        var message = "Harmony has not been run from within the FPTR Desktop Launcher.\n\nNot under a FPTR Desktop environment.\n";
         MessageLog.trace(message);
         return false;
     }
 
-    MessageLog.trace("Shotgun engine...");
+    MessageLog.trace("FPTR engine...");
     var engine_port = System.getenv("SGTK_HARMONY_ENGINE_PORT");
-    MessageLog.trace("Shotgun engine port: " + engine_port);
+    MessageLog.trace("FPTR engine port: " + engine_port);
 
     var app = QCoreApplication.instance();
     var active_window = QApplication.activeWindow();
-    var engine = app.shotgun_engine;
+    var engine = app.fptr_engine;
 
     if (engine == null)
     {
         engine = new Engine();
         engine.start();
         bootstrap();
-        app.shotgun_engine = engine;
+        app.fptr_engine = engine;
 
         // connect callbacks to the engine
         // make sure we remove the python engine when we quit harmony
@@ -1474,7 +1474,7 @@ function Shotgun()
         if (!engine.is_engine_ready)
         {
             engine.clear_busy();
-            engine.show_busy("Initializing Shotgun Engine, please wait ...",  "Shotgun engine is being loaded at the moment, this dialog will close once the connection has been established.");
+            engine.show_busy("Initializing FPTR Engine, please wait ...",  "FPTR engine is being loaded at the moment, this dialog will close once the connection has been established.");
             System.processOneEvent();
 
             engine.on_engine_ready_callbacks.push(engine.clear_busy);
@@ -1482,23 +1482,23 @@ function Shotgun()
             engine.on_engine_ready_callbacks.push(engine.refresh_title);
         }
     }
-    MessageLog.trace("Shotgun engine...Done")
+    MessageLog.trace("FPTR engine...Done")
     return true;
 }
 
-function ShotgunMenu()
+function FPTRMenu()
 {
-    var initialized = Shotgun();
+    var initialized = FPTR();
 
     if (!initialized)
     {
-        var message = "Harmony has not been run from the Shotgun within Desktop Launcher.\n\nNot under a Shotgun Desktop environment.\n";
-        MessageBox.information(message, 0,0,0 , "Shotgun Harmony Engine")
+        var message = "Harmony has not been run from the FPTR within Desktop Launcher.\n\nNot under a FPTR Desktop environment.\n";
+        MessageBox.information(message, 0,0,0 , "FPTR Harmony Engine")
         return;
     }
 
     var app = QCoreApplication.instance();
-    var engine = app.shotgun_engine;
+    var engine = app.fptr_engine;
 
     if (engine != null)
     {
@@ -1527,28 +1527,28 @@ function bootstrap()
     var app = QCoreApplication.instance();
     var engine_is_up = typeof(app.__SGTK_STARTUP_INIT__) != "undefined";
     if (engine_is_up)
-        engine_is_up = engine_is_up && typeof(app.shotgun) != "undefined";
+        engine_is_up = engine_is_up && typeof(app.fptr) != "undefined";
 
     if (engine_is_up)
-        engine_is_up = engine_is_up && typeof(app.shotgun.engine_process) != "undefined";
+        engine_is_up = engine_is_up && typeof(app.fptr.engine_process) != "undefined";
 
     if (engine_is_up)
-        engine_is_up = engine_is_up && app.shotgun.engine_process.isAlive() == true;
+        engine_is_up = engine_is_up && app.fptr.engine_process.isAlive() == true;
 
     MessageLog.trace("engine_is_up:" + engine_is_up);
     if (engine_is_up)
-        MessageLog.trace("app.shotgun.engine_process:" + app.shotgun.engine_process);
+        MessageLog.trace("app.fptr.engine_process:" + app.fptr.engine_process);
 
     var do_startup = !engine_is_up;
     MessageLog.trace("do_startup:" + do_startup);
 
     if (do_startup)
     {
-        if (typeof(app.shotgun) === "undefined")
-            app.shotgun = {};
+        if (typeof(app.fptr) === "undefined")
+            app.fptr = {};
 
         MessageLog.trace('-------------------------');
-        MessageLog.trace('Shotgun startup started');
+        MessageLog.trace('FPTR startup started');
         MessageLog.trace('-------------------------');
 
         var python_exec = System.getenv('SGTK_HARMONY_ENGINE_PYTHON');
@@ -1556,13 +1556,13 @@ function bootstrap()
         var engine_name = 'tk-harmony';
         var engine_port = System.getenv('SGTK_HARMONY_ENGINE_PORT');
         var app_id = 'basic.*`';
-        MessageLog.trace('Initializing Shotgun Harmony engine ...');
+        MessageLog.trace('Initializing FPTR Harmony engine ...');
         MessageLog.trace('   engine name: ' + engine_name);
         MessageLog.trace('   engine port: ' + engine_port );
         MessageLog.trace('   engine app id: ' + app_id);
         MessageLog.trace('   engine python: ' + python_exec);
         MessageLog.trace('   engine bootstrap: ' + boostrap_py);
-        
+
         var args = [
             boostrap_py,
             engine_port,
@@ -1585,28 +1585,28 @@ function bootstrap()
         MessageLog.trace('About to execute: ');
         MessageLog.trace('  Command: ' + python_exec + ' ' + args.map(function(arg){ return arg.indexOf(' ') !== -1 ? '"' + arg + '"' : arg; }).join(' '));
 
-        app.shotgun.window = null;
-        app.shotgun.engine_name = engine_name;
+        app.fptr.window = null;
+        app.fptr.engine_name = engine_name;
 
-        app.shotgun.engine_process = engine_process;
-        app.shotgun.engine_pid = pid;
+        app.fptr.engine_process = engine_process;
+        app.fptr.engine_pid = pid;
 
-        app.shotgun.engine_host = "localhost";
-        app.shotgun.engine_port = parseInt(engine_port);
+        app.fptr.engine_host = "localhost";
+        app.fptr.engine_port = parseInt(engine_port);
 
-        app.shotgun.debug = true;
+        app.fptr.debug = true;
 
         MessageLog.trace("Registered onAboutToQuit callback: " + app.aboutToQuit);
         app.aboutToQuit.connect(app, function() {
-            MessageLog.trace("Application closing. Attempting to terminate engine process (PID: " + app.shotgun.engine_pid + ").");
-            if (app.shotgun.engine_process && app.shotgun.engine_process.state() != QProcess.NotRunning) {
-                app.shotgun.engine_process.terminate();
+            MessageLog.trace("Application closing. Attempting to terminate engine process (PID: " + app.fptr.engine_pid + ").");
+            if (app.fptr.engine_process && app.fptr.engine_process.state() != QProcess.NotRunning) {
+                app.fptr.engine_process.terminate();
             }
         });
 
         app.__SGTK_STARTUP_INIT__ = true;
 
-        MessageLog.trace('Shotgun startup finished.');
+        MessageLog.trace('FPTR startup finished.');
         MessageLog.trace('-------------------------');
     }
     else
@@ -1617,9 +1617,9 @@ function bootstrap()
 
 function init()
 {
-    MessageLog.trace("Shotgun Initalization...");
-    Shotgun()
-    MessageLog.trace("Shotgun Initalization... Done");
+    MessageLog.trace("FPTR Initalization...");
+    FPTR()
+    MessageLog.trace("FPTR Initalization... Done");
 }
 
 
