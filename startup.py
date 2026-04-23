@@ -374,23 +374,7 @@ class HarmonyLauncher(SoftwareLauncher):
                 )
                 for (path, key_dict) in executable_matches:
                     if executable_path == path:
-                        version_split = key_dict["version"].split(".")
-                        self.logger.debug("version_split: %s" % version_split)
-                        if len(version_split) > 1:
-                            scripts_version = "{}{}".format(
-                                version_split[0], version_split[-1]
-                            ).ljust(4, "0")
-                        else:
-                            scripts_version = "{}00".format(
-                                version_split[0])
-
-                        self.logger.debug("scripts_version: %s" % scripts_version)
-                        scripts_path = os.path.join(
-                            path_root,
-                            "%(company00)s Animation" % key_dict,
-                            "%(company00)s %(product00)s %(edition00)s" % key_dict,
-                            "%s-scripts" % scripts_version,
-                        )
+                        scripts_path = self._get_versioned_path(path_root, key_dict, "scripts")
                         break
 
         self.logger.info("scripts_path: {}".format(scripts_path))
@@ -483,24 +467,68 @@ class HarmonyLauncher(SoftwareLauncher):
                 )
                 for (path, key_dict) in executable_matches:
                     if executable_path == path:
-                        version_split = key_dict["version"].split(".")
-                        self.logger.debug("version_split: %s" % version_split)
-                        if len(version_split) > 1:
-                            pref_version = "{}{}".format(
-                                version_split[0], version_split[-1]
-                            ).ljust(4, "0")
-                        else:
-                            pref_version = "{}00".format(
-                                version_split[0])
-
-                        self.logger.debug("pref_version: %s" % pref_version)
-                        preferences_path = os.path.join(
-                            path_root,
-                            "%(company00)s Animation" % key_dict,
-                            "%(company00)s %(product00)s %(edition00)s" % key_dict,
-                            "full-%s-pref" % pref_version,
+                        preferences_path = self._get_versioned_path(
+                            path_root, key_dict, "pref"
                         )
                         break
 
         self.logger.info("preferences_path: {}".format(preferences_path))
         return preferences_path
+
+    def _get_versioned_path(self, path_root, key_dict, folder_type):
+        """
+        Helper to find the correct versioned folder (scripts or preferences).
+        It tries to discover the folder on disk first, then falls back to
+        version-based defaults.
+        """
+        version_split = key_dict["version"].split(".")
+        major_str = version_split[0]
+        minor_str = version_split[1] if len(version_split) > 1 else "0"
+
+        v_major_minor = "{}{}".format(major_str, minor_str).ljust(4, "0")
+        v_major_only = "{}00".format(major_str)
+
+        if folder_type == "scripts":
+            pattern = "%s-scripts"
+        else:
+            pattern = "full-%s-pref"
+
+        path_major_minor = os.path.join(
+            path_root,
+            "%(company00)s Animation" % key_dict,
+            "%(company00)s %(product00)s %(edition00)s" % key_dict,
+            pattern % v_major_minor,
+        )
+
+        path_major_only = os.path.join(
+            path_root,
+            "%(company00)s Animation" % key_dict,
+            "%(company00)s %(product00)s %(edition00)s" % key_dict,
+            pattern % v_major_only,
+        )
+
+        # 1. Discovery: If one of the folders already exists, use it.
+        if os.path.exists(path_major_minor):
+            self.logger.info(
+                f"Discovered Harmony {folder_type} path: {path_major_minor}"
+            )
+            return path_major_minor
+
+        if os.path.exists(path_major_only):
+            self.logger.info(
+                f"Discovered Harmony {folder_type} path: {path_major_only}"
+            )
+            return path_major_only
+
+        # 2. Fallback: If neither exists (e.g. first launch), use version threshold.
+        # Harmony 22+ seems to have moved strictly to Major-only folders.
+        if int(major_str) < 22:
+            self.logger.info(
+                f"Defaulting Harmony {folder_type} path to Major+Minor: {path_major_minor}"
+            )
+            return path_major_minor
+        else:
+            self.logger.info(
+                f"Defaulting Harmony {folder_type} path to Major-only: {path_major_only}"
+            )
+            return path_major_only
