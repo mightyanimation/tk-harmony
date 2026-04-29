@@ -8,7 +8,7 @@ function configure(packageFolder, packageName)
   //---------------------------
   //Create Shortcuts
   ScriptManager.addShortcut( { id       : "FPTRShortcut",
-                               text     : "FPTR Menu ...",
+                               text     : "FlowPTR Menu ...",
                                action   : "FPTRMenu in ./configure.js",
                                longDesc : "Starts the fptr connection",
                                order    : "256",
@@ -20,17 +20,17 @@ function configure(packageFolder, packageName)
   ScriptManager.addMenuItem( { targetMenuId : "Windows",
                                id           : "FPTRMenuID",
                                icon     : "fptr.png",
-                               text         : "FPTR Menu ...",
+                               text         : "FlowPTR Menu ...",
                                action       : "FPTRMenu in ./configure.js",
                                shortcut     : "FPTRShortcut" } );
 
   //---------------------------
   //Create Toolbar
   var FPTRToolbar = new ScriptToolbarDef( { id          : "FPTRToolbar",
-                                               text        : "FPTR",
+                                               text        : "FlowPTR",
                                                customizable: "false" } );
 
-  FPTRToolbar.addButton( { text     : "FPTR",
+  FPTRToolbar.addButton( { text     : "FlowPTR",
                               icon     : "fptr.png",
                               action   : "FPTRMenu in ./configure.js" ,
                               shortcut : "FPTRShortcut" } );
