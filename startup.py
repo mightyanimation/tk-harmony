@@ -284,7 +284,13 @@ class HarmonyLauncher(SoftwareLauncher):
 
         required_env["SGTK_HARMONY_STARTUP_TEMPLATE"] = xtage.replace("\\", "/")
 
-        args = " -debug"
+        # We ensure -debug is NOT passed to Harmony to avoid enabling Debug Mode
+        # and we preserve any other arguments passed to the launcher.
+        if args:
+            args = args.replace("-debug", "")
+        else:
+            args = ""
+
         args += ' "' + xtage + '"'
 
         self.logger.debug("Launch info: %s" % args)
