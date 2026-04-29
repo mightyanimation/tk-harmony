@@ -17,6 +17,7 @@ import tank
 import sys
 import os
 import unicodedata
+import traceback
 
 
 __author__ = "Diego Garcia Huerta"
@@ -36,8 +37,7 @@ class MenuGenerator(object):
         self._menu_name = menu_name
         self._dialogs = []
 
-        self._widget = QtGui.QWidget()
-        self._handle = QtGui.QMenu(self._menu_name, self._widget)
+        self._handle = QtGui.QMenu(self._menu_name)
         self._ui_cache = []
         self.logger = self._engine.logger
 
@@ -53,12 +53,12 @@ class MenuGenerator(object):
 
         qApp = QtGui.QApplication.instance()
 
-        self.menu_handle.activateWindow()
-        self.menu_handle.raise_()
-
-        qApp.processEvents()
-
-        self.menu_handle.exec_(pos)
+        if sys.platform == "darwin":
+            self.logger.debug(f"Showing menu at {pos} using popup()")
+            self.menu_handle.popup(pos)
+        else:
+            self.logger.debug(f"Showing menu at {pos} using exec_()")
+            self.menu_handle.exec_(pos)
 
     def create_menu(self, disabled=False):
         """
@@ -129,6 +129,9 @@ class MenuGenerator(object):
 
         # add menu divider
         self._add_menu_item("-- Exit Menu --", self.menu_handle, self.menu_handle.hide)
+
+        # store the menu items in the cache to avoid garbage collection
+        self._ui_cache = menu_items
 
     def _add_divider(self, parent_menu):
         divider = QtGui.QAction(parent_menu)
@@ -251,8 +254,21 @@ class AppCommand(object):
         self.name = name
         self.parent = parent
         self.properties = command_dict["properties"]
-        self.callback = command_dict["callback"]
+        self._callback = command_dict["callback"]
         self.favourite = False
+
+    def __del__(self):
+        # self.parent.logger.debug(f"AppCommand deleted: {self.name}")
+        pass
+
+    def callback(self):
+        self.parent.logger.info(f"Triggering ShotGrid command: {self.name}")
+        try:
+            # use a timer to ensure the callback runs after the menu has closed
+            QtCore.QTimer.singleShot(0, self._callback)
+        except Exception as e:
+            self.parent.logger.exception(f"Error triggering command {self.name}: {e}")
+        self.parent.logger.info(f"ShotGrid command queued: {self.name}")
 
     def get_app_name(self):
         """

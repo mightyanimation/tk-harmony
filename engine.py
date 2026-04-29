@@ -39,6 +39,38 @@ SHOW_COMP_DLG = "SGTK_COMPATIBILITY_DIALOG_SHOWN"
 
 MIN_DCC_VERSION = 16.0
 
+
+def activate_macos_app():
+    """
+    On macOS, background processes need to be explicitly activated
+    to receive focus and handle UI interactions correctly.
+    """
+    import sys
+
+    if sys.platform != "darwin":
+        return
+
+    try:
+        import ctypes
+        import ctypes.util
+
+        objc = ctypes.cdll.LoadLibrary(ctypes.util.find_library("objc"))
+        objc.objc_getClass.restype = ctypes.c_void_p
+        objc.sel_registerName.restype = ctypes.c_void_p
+        objc.objc_msgSend.restype = ctypes.c_void_p
+        objc.objc_msgSend.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+
+        ns_app_cls = objc.objc_getClass(b"NSApplication")
+        shared_app_sel = objc.sel_registerName(b"sharedApplication")
+        ns_app = objc.objc_msgSend(ns_app_cls, shared_app_sel)
+
+        if ns_app:
+            activate_sel = objc.sel_registerName(b"activateIgnoringOtherApps:")
+            # Use c_char(1) for True as it's a BOOL (signed char in ObjC)
+            objc.objc_msgSend(ns_app, activate_sel, ctypes.c_char(1))
+    except Exception:
+        pass
+
 # logging functionality
 def display_error(msg):
     t = time.asctime(time.localtime())
@@ -342,7 +374,7 @@ class HarmonyEngine(Engine):
         get_harmony_exe();
 """
         return self._dcc_app.custom_script(cmds)
-    
+
     @property
     def harmony_scripts_path(self):
         cmds="""
@@ -353,7 +385,7 @@ class HarmonyEngine(Engine):
         harmony_scripts_path();
 """
         return self._dcc_app.custom_script(cmds)
-    
+
     @property
     def harmony_preferences_path(self):
         cmds="""
@@ -364,8 +396,8 @@ class HarmonyEngine(Engine):
         harmony_preferences_path();
 """
         return self._dcc_app.custom_script(cmds)
-    
-    
+
+
     def warn_dcc_app_version(self):
 
         # check that we are running an ok version of Toon Boom Harmony
@@ -540,6 +572,8 @@ class HarmonyEngine(Engine):
         # Make the QApplication use the dark theme. Must be called after the
         # QApplication is instantiated
         self._initialize_dark_look_and_feel()
+
+        activate_macos_app()
 
         self.logger.debug("QT Application: %s" % self._qt_app)
 

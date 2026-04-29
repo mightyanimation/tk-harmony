@@ -189,56 +189,61 @@ class QTcpSocketClient(QtCore.QObject):
             self._receive()
 
     def _receive(self):
-        logger.debug("Receiving data ... ")
+        was_receiving = self._receiving
+        self._receiving = True
+        try:
+            logger.debug("Receiving data ... ")
 
-        logger.debug("PyQt version: {}".format(QtCore.__version__))
-        # logger.info("PyQt version_info: {}".format(QtCore.__version_info__))
+            logger.debug("PyQt version: {}".format(QtCore.__version__))
+            # logger.info("PyQt version_info: {}".format(QtCore.__version_info__))
 
-        stream = QtCore.QDataStream(self.connection)
-        # stream.setVersion(QtCore.QDataStream.Qt_4_6)
+            stream = QtCore.QDataStream(self.connection)
+            # stream.setVersion(QtCore.QDataStream.Qt_4_6)
 
-        i = 0
-        while self.connection.bytesAvailable() > 0:
-            if (self._block_size == 0 and self.connection.bytesAvailable() >= INT32_SIZE) or (
-                self._block_size > 0 and self.connection.bytesAvailable() >= self._block_size
-            ):
-                self._block_size = stream.readInt32()
-                # logger.debug(
-                #     "Reading data size for request %s in queue: %s"
-                #     % (i, self._block_size)
-                # )
-                logger.debug("_block_size: {}".format(self._block_size))
+            i = 0
+            while self.connection.bytesAvailable() > 0:
+                if (self._block_size == 0 and self.connection.bytesAvailable() >= INT32_SIZE) or (
+                    self._block_size > 0 and self.connection.bytesAvailable() >= self._block_size
+                ):
+                    self._block_size = stream.readInt32()
+                    # logger.debug(
+                    #     "Reading data size for request %s in queue: %s"
+                    #     % (i, self._block_size)
+                    # )
+                    logger.debug("_block_size: {}".format(self._block_size))
 
-            if self._block_size > 0 and self.connection.bytesAvailable() >= self._block_size:
-                data = stream.readRawData(self._block_size)
-                logger.debug("data: {}, type: {}".format(data, type(data)))
-                # logger.info("dir(data):\n{}".format(pf(dir(data))))
-                # Qt 5.x code (PySide2)
-                if QtCore.__version__.startswith("5."):
-                    try:
-                        request = QtCore.QTextCodec.codecForMib(106).toUnicode(data)
-                    except Exception as e:
-                        logger.warning(
-                            "Error decoding request: {}, full traceback:\n{}".format(
-                                e, traceback.format_exc()
+                if self._block_size > 0 and self.connection.bytesAvailable() >= self._block_size:
+                    data = stream.readRawData(self._block_size)
+                    logger.debug("data: {}, type: {}".format(data, type(data)))
+                    # logger.info("dir(data):\n{}".format(pf(dir(data))))
+                    # Qt 5.x code (PySide2)
+                    if QtCore.__version__.startswith("5."):
+                        try:
+                            request = QtCore.QTextCodec.codecForMib(106).toUnicode(data)
+                        except Exception as e:
+                            logger.warning(
+                                "Error decoding request: {}, full traceback:\n{}".format(
+                                    e, traceback.format_exc()
+                                )
                             )
-                        )
-                # Qt 6.x code (PySide6)
-                elif QtCore.__version__.startswith("6."):
-                    try:
-                        # request = QtCore.QTextCodec.codecForName("UTF-8").toUnicode(data)
-                        request = data.decode("utf-8")
-                    except Exception as e:
-                        logger.warning(
-                            "Error decoding request: {}, full traceback:\n{}".format(
-                                e, traceback.format_exc()
+                    # Qt 6.x code (PySide6)
+                    elif QtCore.__version__.startswith("6."):
+                        try:
+                            # request = QtCore.QTextCodec.codecForName("UTF-8").toUnicode(data)
+                            request = data.decode("utf-8")
+                        except Exception as e:
+                            logger.warning(
+                                "Error decoding request: {}, full traceback:\n{}".format(
+                                    e, traceback.format_exc()
+                                )
                             )
-                        )
-                # logger.debug("About to process request:\n%s\nin queue:\n%s" % (i, request))
-                logger.debug("decoded request: {}, type: {}".format(request, type(request)))
-                self._process_request(request)
-                self._block_size = 0
-                i += 1
+                    # logger.debug("About to process request:\n%s\nin queue:\n%s" % (i, request))
+                    logger.debug("decoded request: {}, type: {}".format(request, type(request)))
+                    self._process_request(request)
+                    self._block_size = 0
+                    i += 1
+        finally:
+            self._receiving = was_receiving
 
         return None
 
@@ -266,6 +271,9 @@ class QTcpSocketClient(QtCore.QObject):
         # make sure is a json like request
         try:
             command = json.loads(request)
+            method = command.get("method", "RESULT/ERROR")
+            request_id = command.get("id", "NO_ID")
+            logger.debug(f"Processing request: {method} (ID: {request_id})")
         except ValueError as e:
             logger.warning("Ignoring request, not well formed. %s", request)
             return None
@@ -305,6 +313,7 @@ class QTcpSocketClient(QtCore.QObject):
 
         st = time.time()
         request_id, request = self._prepare_request(method, request_return=True, **kwargs)
+        logger.debug("Sending command to Harmony: %s" % method)
         self._send(request)
         st1 = time.time()
 

@@ -12,6 +12,38 @@ def normpath(path):
     return os.path.abspath(path).replace("\\", "/")
 
 
+def activate_macos_app():
+    """
+    On macOS, background processes need to be explicitly activated
+    to receive focus and handle UI interactions correctly.
+    """
+    import sys
+
+    if sys.platform != "darwin":
+        return
+
+    try:
+        import ctypes
+        import ctypes.util
+
+        objc = ctypes.cdll.LoadLibrary(ctypes.util.find_library("objc"))
+        objc.objc_getClass.restype = ctypes.c_void_p
+        objc.sel_registerName.restype = ctypes.c_void_p
+        objc.objc_msgSend.restype = ctypes.c_void_p
+        objc.objc_msgSend.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+
+        ns_app_cls = objc.objc_getClass(b"NSApplication")
+        shared_app_sel = objc.sel_registerName(b"sharedApplication")
+        ns_app = objc.objc_msgSend(ns_app_cls, shared_app_sel)
+
+        if ns_app:
+            activate_sel = objc.sel_registerName(b"activateIgnoringOtherApps:")
+            # Use c_char(1) for True as it's a BOOL (signed char in ObjC)
+            objc.objc_msgSend(ns_app, activate_sel, ctypes.c_char(1))
+    except Exception:
+        pass
+
+
 class Cached(object):
     def __init__(self, f, ttl=0, size_limit=0):
         self.func = f
@@ -145,7 +177,7 @@ def copy_tree(
             copy_function(source_file, destination_file)
         except:
             pass
-        
+
         copied_files.append(destination_file)
 
     if progress_callback is not None:
