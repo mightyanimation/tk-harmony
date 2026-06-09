@@ -487,6 +487,13 @@ class HarmonyLauncher(SoftwareLauncher):
         It tries to discover the folder on disk first, then falls back to
         version-based defaults.
         """
+        # Copy key_dict and normalize company and product names for path matching
+        key_dict = key_dict.copy()
+        if key_dict.get("company00") == "ToonBoom":
+            key_dict["company00"] = "Toon Boom"
+        if key_dict.get("product00") == "harmony":
+            key_dict["product00"] = "Harmony"
+
         version_split = key_dict["version"].split(".")
         major_str = version_split[0]
         minor_str = version_split[1] if len(version_split) > 1 else "0"

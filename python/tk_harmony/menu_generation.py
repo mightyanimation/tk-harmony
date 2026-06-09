@@ -204,7 +204,7 @@ class MenuGenerator(object):
             system = sys.platform
 
             # run the app
-            if system == "linux2":
+            if system in ["linux", "linux2"]:
                 cmd = 'xdg-open "%s"' % disk_location
             elif system == "darwin":
                 cmd = 'open "%s"' % disk_location

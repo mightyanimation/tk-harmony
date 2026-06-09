@@ -402,7 +402,7 @@ class HarmonyEngine(Engine):
 
         # check that we are running an ok version of Toon Boom Harmony
         current_os = sys.platform
-        if current_os not in ["darwin", "win32", "linux64"]:
+        if current_os not in ["darwin", "win32", "linux", "linux2", "linux64"]:
             raise tank.TankError(
                 "The current platform is not supported!"
                 " Supported platforms "
@@ -501,7 +501,7 @@ class HarmonyEngine(Engine):
 
         # check that we are running an ok version of Harmony
         current_os = sys.platform
-        if current_os not in ["darwin", "win32", "linux64"]:
+        if current_os not in ["darwin", "win32", "linux", "linux2", "linux64"]:
             raise tank.TankError(
                 "The current platform is not supported!"
                 " Supported platforms "
