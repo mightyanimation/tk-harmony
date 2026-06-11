@@ -5,6 +5,7 @@ Module that encapsulates access to the actual application
 
 
 import os
+import sys
 import glob
 import traceback
 from itertools import chain
@@ -21,7 +22,22 @@ class Application(QTcpSocketClient):
     def __init__(self, engine, parent=None, host=None, port=None):
         super(Application, self).__init__(parent=parent, host=host, port=port)
         self.engine = engine
+        self._initial_parent_pid = os.getppid() if hasattr(os, "getppid") else None
         self.engine.logger.debug("Started Application: %s" % self)
+
+    def _on_disconnected(self):
+        self.engine.logger.warning("Socket disconnected from Harmony.")
+        if sys.platform.startswith("linux") or sys.platform == "darwin":
+            initial_parent_pid = getattr(self, "_initial_parent_pid", None)
+            if initial_parent_pid and os.getppid() != initial_parent_pid:
+                self.engine.logger.error(
+                    "Parent process (Harmony) has exited. Quitting engine process..."
+                )
+                self.engine.show_warning(
+                    "Harmony is no longer fully connected to the ShotGrid engine.\n\n"
+                    "Please save your work and restart Harmony from the ShotGrid Desktop app."
+                )
+                self.engine.on_app_quit()
 
     def connect(self):
         while not self.is_connected():

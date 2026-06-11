@@ -58,6 +58,7 @@ class QTcpSocketClient(QtCore.QObject):
 
         self.connection = QtNetwork.QTcpSocket(self)
         self.connection.connected.connect(self._on_connected)
+        self.connection.disconnected.connect(self._on_disconnected)
         self._buffer = None
         self._receiving = False
 
@@ -114,6 +115,9 @@ class QTcpSocketClient(QtCore.QObject):
 
     def _on_readyRead(self):
         logger.warning("Ready to read")
+
+    def _on_disconnected(self):
+        logger.debug("Socket disconnected.")
 
     def _on_error(self):
         logger.debug("Error occurred: %s" % self.connection.errorString())
